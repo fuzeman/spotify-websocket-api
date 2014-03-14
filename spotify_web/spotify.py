@@ -23,25 +23,50 @@ base62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 class Logging():
     log_level = 1
 
-    @staticmethod
-    def debug(str):
-        if Logging.log_level >= 3:
-            print "[DEBUG] " + str
+    hooks = {}
 
-    @staticmethod
-    def notice(str):
-        if Logging.log_level >= 2:
-            print "[NOTICE] " + str
+    @classmethod
+    def hook(cls, level, handler):
+        cls.hooks[level] = handler
 
-    @staticmethod
-    def warn(str):
-        if Logging.log_level >= 1:
-            print "[WARN] " + str
+    @classmethod
+    def write(cls, level, str):
+        if level in cls.hooks:
+            cls.hooks[level](str)
+            return True
 
-    @staticmethod
-    def error(str):
-        if Logging.log_level >= 0:
-            print "[ERROR] " + str
+        if cls.log_level < level:
+            return True
+
+        return False
+
+    @classmethod
+    def debug(cls, str):
+        if cls.write(3, str):
+            return
+
+        print "[DEBUG] " + str
+
+    @classmethod
+    def notice(cls, str):
+        if cls.write(2, str):
+            return
+
+        print "[NOTICE] " + str
+
+    @classmethod
+    def warn(cls, str):
+        if cls.write(1, str):
+            return
+
+        print "[WARN] " + str
+
+    @classmethod
+    def error(cls, str):
+        if cls.write(0, str):
+            return
+
+        print "[ERROR] " + str
 
 
 class WrapAsync():
