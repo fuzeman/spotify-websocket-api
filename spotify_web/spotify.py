@@ -20,6 +20,8 @@ from .proto import mercury_pb2, metadata_pb2, playlist4changes_pb2,\
 
 base62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+FLASH_KEY = [[19, 104], [16, 19], [0, 41], [3, 133], [10, 175], [1, 240], [5, 150], [17, 116], [7, 240], [13, 0]]
+
 WORK_RUNNER = """
 var main = {
   args: null,
@@ -810,6 +812,25 @@ class SpotifyAPI():
     def work_callback(self, sp, resp):
         Logging.debug("Got ack for message reply")
 
+    def send_pong(self, ping):
+        ping_parts = ping.split(' ')
+
+        pong = "undefined 0"
+
+        if len(ping_parts) >= 20:
+            result = []
+
+            for x in range(len(FLASH_KEY)):
+                idx = FLASH_KEY[x][0]
+                xor = FLASH_KEY[x][1]
+
+                result.append(str(int(ping_parts[idx]) ^ xor))
+
+            pong = ' '.join(result)
+
+        Logging.debug('received flash ping %s, sending pong: %s' % (ping, pong))
+        self.send_command('sp/pong_flash2', [pong])
+
     def handle_message(self, msg):
         cmd = msg[0]
 
@@ -819,6 +840,9 @@ class SpotifyAPI():
 
         if cmd == "do_work":
             self.work(payload)
+
+        if cmd == "ping_flash2":
+            self.send_pong(payload)
 
     def handle_error(self, err):
         if len(err) < 2:
