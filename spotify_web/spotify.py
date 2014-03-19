@@ -4,6 +4,7 @@ import json
 import operator
 import binascii
 import base64
+import execjs
 from ssl import SSLError
 from threading import Thread, Event, Lock
 
@@ -18,6 +19,22 @@ from .proto import mercury_pb2, metadata_pb2, playlist4changes_pb2,\
 
 
 base62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+WORK_RUNNER = """
+var main = {
+  args: null,
+
+  reply: function() {
+    main.args = Array.prototype.slice.call(arguments);
+  },
+
+  run: function() {
+    %s
+
+    return main.args;
+  }
+};
+"""
 
 
 class Logging():
@@ -780,16 +797,28 @@ class SpotifyAPI():
             else:
                 Logging.debug("Unhandled command response with id " + str(pid))
 
+    def work(self, payload):
+        Logging.debug("Got do_work message, payload: " + payload)
+
+        ctx = execjs.compile(WORK_RUNNER % payload)
+        result = ctx.eval('main.run.call(main)')
+
+        Logging.debug('Work result: %s' % result)
+
+        self.send_command("sp/work_done", result, self.work_callback)
+
     def work_callback(self, sp, resp):
         Logging.debug("Got ack for message reply")
 
     def handle_message(self, msg):
         cmd = msg[0]
+
+        payload = None
         if len(msg) > 1:
             payload = msg[1]
+
         if cmd == "do_work":
-            Logging.debug("Got do_work message, payload: "+payload)
-            self.send_command("sp/work_done", ["v1"], self.work_callback)
+            self.work(payload)
 
     def handle_error(self, err):
         if len(err) < 2:
