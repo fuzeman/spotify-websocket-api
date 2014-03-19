@@ -711,7 +711,6 @@ class SpotifyAPI():
         ms_seeks_forward = 0
         ms_seeks_backward = 0
         ms_latency = 100
-        display_track = None
         play_context = "unknown"
         source_start = "unknown"
         source_end = "unknown"
@@ -721,7 +720,23 @@ class SpotifyAPI():
         referrer_version = "0.1.0"
         referrer_vendor = "com.spotify"
         max_continuous = ms_played
-        args = [lid, ms_played, ms_played_union, n_seeks_forward, n_seeks_backward, ms_seeks_forward, ms_seeks_backward, ms_latency, display_track, play_context, source_start, source_end, reason_start, reason_end, referrer, referrer_version, referrer_vendor, max_continuous]
+
+        args = [
+            lid,
+            ms_played, ms_played_union,
+            n_seeks_forward, n_seeks_backward,
+            ms_seeks_forward, ms_seeks_backward,
+            ms_latency,
+            track_uri,
+            play_context,
+            source_start, source_end,
+            reason_start, reason_end,
+            referrer, referrer_version, referrer_vendor,
+            max_continuous,
+            "none",
+            "na"
+        ]
+
         return self.wrap_request("sp/track_end", args, callback)
 
     def send_track_event(self, lid, event, ms_where, callback=False):
@@ -731,6 +746,7 @@ class SpotifyAPI():
             ev_n = 3
         else:
             return False
+
         return self.wrap_request("sp/track_event", [lid, ev_n, int(ms_where)], callback)
 
     def send_track_progress(self, lid, ms_played, callback=False):
@@ -742,7 +758,18 @@ class SpotifyAPI():
         referrer = "unknown"
         referrer_version = "0.1.0"
         referrer_vendor = "com.spotify"
-        args = [lid, source_start, reason_start, int(ms_played), int(ms_latency), play_context, display_track, referrer, referrer_version, referrer_vendor]
+
+        args = [
+            lid,
+            source_start,
+            reason_start,
+            int(ms_played),
+            int(ms_latency),
+            play_context,
+            display_track,
+            referrer, referrer_version, referrer_vendor
+        ]
+
         return self.wrap_request("sp/track_progress", args, callback)
 
     def send_command(self, name, args=None, callback=None):
