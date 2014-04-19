@@ -189,7 +189,9 @@ class SpotifyUtil():
 
 
 class SpotifyAPI():
-    def __init__(self, login_callback_func=False):
+    def __init__(self, login_callback_func=False, log_level=1):
+        Logging.log_level = log_level
+
         self.auth_server = "play.spotify.com"
 
         self.logged_in_marker = Event()
