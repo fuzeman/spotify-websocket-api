@@ -20,7 +20,7 @@ from .proto import mercury_pb2, metadata_pb2, playlist4changes_pb2,\
 
 base62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-FLASH_KEY = [[19, 104], [16, 19], [0, 41], [3, 133], [10, 175], [1, 240], [5, 150], [17, 116], [7, 240], [13, 0]]
+FLASH_KEY = [[7, 203], [15, 15], [1, 96], [19, 93], [3, 165], [14, 130], [12, 16], [4, 6], [6, 225], [13, 37]]
 
 WORK_RUNNER = """
 var main = {
